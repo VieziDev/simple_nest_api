@@ -1,0 +1,52 @@
+name: Node.js CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build: # Job de CI (igual ao anterior)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run lint --if-present
+    - run: npm run test --if-present
+    - run: npm run build --if-present
+
+  deploy: # Novo Job de CD (simulado)
+    needs: build # Garante que este job só roda se o job 'build' passar
+    runs-on: ubuntu-latest
+    # Condição: Só roda em push para main, NÃO em PRs
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    strategy:
+      matrix:
+        node-version: [22.x] # Use a mesma versão do Node do build
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build # Precisa rodar o build novamente ou baixar artefato do job anterior (mais avançado)
+    - name: Upload artifact # Simula o "deploy" salvando o build
+      uses: actions/upload-artifact@v4
+      with:
+        name: nestjs-app-build # Nome do artefato
+        path: dist/ # Pasta que o NestJS gera com o build
+    - name: Deployment Simulation Log # Log simples para indicar sucesso
+      run: echo "Deployment artifact uploaded successfully!"
