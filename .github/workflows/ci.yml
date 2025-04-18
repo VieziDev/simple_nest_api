@@ -1,0 +1,40 @@
+name: Node.js CI # Nome do Workflow
+
+# Gatilhos: Roda em pushes e PRs para a branch main (ajuste se usar outra principal)
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build: # Nome do Job
+    runs-on: ubuntu-latest # Sistema operacional do runner
+
+    strategy:
+      matrix:
+        node-version: [22.x] # Especifique a versão do Node.js compatível com seu NestJS (ex: LTS)
+        # Pode adicionar mais versões se quiser testar em múltiplas
+
+    steps:
+    - name: Checkout repository # 1. Baixa o código do repositório
+      uses: actions/checkout@v4 # Use a versão mais recente estável
+
+    - name: Set up Node.js ${{ matrix.node-version }} # 2. Configura a versão do Node.js
+      uses: actions/setup-node@v4 # Use a versão mais recente estável
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm' # 3. Habilita cache para node_modules (acelera builds futuras)
+
+    - name: Install dependencies # 4. Instala as dependências de forma rápida e segura
+      run: npm ci # 'ci' é geralmente preferível a 'install' em CI
+
+    # Passos Opcionais, mas Altamente Recomendados para CI:
+    - name: Lint code # 5. Verifica a formatação e qualidade do código (se tiver script de lint)
+      run: npm run lint --if-present # '--if-present' evita erro se o script não existir
+
+    - name: Run tests # 6. Executa os testes automatizados (se tiver)
+      run: npm run test --if-present # Use 'test:cov' para coverage, se configurado
+
+    - name: Build project # 7. Compila o projeto TypeScript para JavaScript
+      run: npm run build --if-present # NestJS usa 'build' por padrão
