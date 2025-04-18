@@ -19,7 +19,13 @@ export class TasksService {
   }
 
   update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
+    const taskIndex = this.tasks.findIndex((task) => task.id === id);
+    if (taskIndex === -1) {
+      return `Task with id #${id} not found`;
+    }
+    const updatedTask = { ...this.tasks[taskIndex], ...updateTaskDto };
+    this.tasks[taskIndex] = updatedTask;
+    return `Task with id #${id} has been updated`;
   }
 
   remove(id: number) {
