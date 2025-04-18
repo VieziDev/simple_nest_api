@@ -23,6 +23,11 @@ export class TasksService {
   }
 
   remove(id: number) {
-    return `This action removes a #${id} task`;
+    const index = this.tasks.findIndex((task) => task.id === id);
+    if (index === -1) {
+      return `Task with id #${id} not found`;
+    }
+    this.tasks.splice(index, 1);
+    return `Task with id #${id} has been removed`;
   }
 }
