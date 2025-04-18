@@ -4,12 +4,14 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Injectable()
 export class TasksService {
+  private readonly tasks: CreateTaskDto[] = [];
   create(createTaskDto: CreateTaskDto) {
+    this.tasks.push(createTaskDto);
     return 'This action adds a new task';
   }
 
   findAll() {
-    return `This action returns all tasks`;
+    return this.tasks;
   }
 
   findOne(id: number) {
