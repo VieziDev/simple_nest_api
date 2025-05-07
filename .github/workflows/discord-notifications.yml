@@ -1,0 +1,47 @@
+name: Discord Notifications
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [ main ]
+
+jobs:
+  notify:
+    name: Send Discord Notification
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Send Discord notification for PR
+      if: github.event_name == 'pull_request'
+      uses: Ilshidur/action-discord@master
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      with:
+        args: |
+          🚀 **Nova Atividade no Repositório**
+          
+          **Tipo:** Pull Request
+          **Ação:** ${{ github.event.action }}
+          **Título:** ${{ github.event.pull_request.title }}
+          **Autor:** ${{ github.event.pull_request.user.login }}
+          **Branch:** ${{ github.event.pull_request.head.ref }} → ${{ github.event.pull_request.base.ref }}
+          **Link:** ${{ github.event.pull_request.html_url }}
+          
+          ${{ github.event.pull_request.body }}
+
+    - name: Send Discord notification for Push
+      if: github.event_name == 'push'
+      uses: Ilshidur/action-discord@master
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      with:
+        args: |
+          🚀 **Nova Atividade no Repositório**
+          
+          **Tipo:** Push
+          **Branch:** ${{ github.ref_name }}
+          **Autor:** ${{ github.actor }}
+          **Commit:** ${{ github.event.head_commit.message }}
+          **Link:** ${{ github.event.head_commit.url }} 
